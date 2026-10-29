@@ -1,28 +1,204 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>CIPHER Test Stream</title>
-    </head>
-    <body style="background-color: #111; color: #0f0; text-align: center; font-family: monospace;">
-        <h2>Project CIPHER: Gateway Test</h2>
-        <!-- This is where the video frames will appear -->
-        <img id="videostream" style="border: 2px solid #0f0; border-radius: 8px; max-width: 100%;" />
-        
-        <script>
-            // 1. Connect to the FastAPI WebSocket
-            var ws = new WebSocket(`ws://${location.host}/ws/video`);
-            var img = document.getElementById("videostream");
-            
-            // 2. Every time a message (frame) arrives, update the image
-            ws.onmessage = async function(event) {
-                // If event.data is a Blob, create the object URL directly
-                var blob = event.data instanceof Blob ? event.data : new Blob([event.data], {type: "image/jpeg"});
-                img.src = URL.createObjectURL(blob);
-            };
-            
-            ws.onopen = function() {
-                console.log("Connected to CIPHER video stream!");
-            };
-        </script>
-    </body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CIPHER Security Gateway</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: #0b0f14;
+            color: #00ff66;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        h2 { margin-bottom: 8px; letter-spacing: 2px; }
+        .status-bar {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 16px;
+        }
+        .status-online { color: #00ff66; font-weight: bold; }
+
+        .video-container {
+            position: relative;
+            max-width: 960px;
+            width: 100%;
+            border: 2px solid #00ff66;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #000;
+            box-shadow: 0 0 20px rgba(0, 255, 102, 0.2);
+        }
+
+        img#videostream {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Floating Toast Container */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 320px;
+            max-width: 90vw;
+        }
+
+        .toast {
+            background: rgba(18, 22, 28, 0.95);
+            border-left: 5px solid #ff3333;
+            border-radius: 6px;
+            padding: 14px 16px;
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+            animation: slideIn 0.3s ease-out forwards;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .toast-title {
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            color: #ff4444;
+        }
+
+        .toast-body {
+            font-size: 13px;
+            color: #d1d5db;
+            line-height: 1.4;
+        }
+
+        .toast-meta {
+            font-size: 11px;
+            color: #6b7280;
+            margin-top: 6px;
+            font-family: 'Courier New', monospace;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <h2>PROJECT CIPHER: EDGE GATEWAY</h2>
+    <div class="status-bar">
+        VIDEO FEED: <span id="video-status" class="status-online">CONNECTING...</span> | 
+        ALERT BUS: <span id="alert-status" class="status-online">CONNECTING...</span>
+    </div>
+
+    <div class="video-container">
+        <img id="videostream" alt="Live Stream Ingest" />
+    </div>
+
+    <!-- Alert Notifications Stack -->
+    <div id="toast-container"></div>
+
+    <script>
+        const host = location.host;
+
+        // 1. Video WebSocket Stream
+        const videoWs = new WebSocket(`ws://${host}/ws/video`);
+        const img = document.getElementById("videostream");
+        const videoStatus = document.getElementById("video-status");
+
+        videoWs.onopen = () => {
+            videoStatus.innerText = "ONLINE (30 FPS)";
+        };
+        videoWs.onclose = () => {
+            videoStatus.innerText = "OFFLINE";
+            videoStatus.style.color = "#ff3333";
+        };
+        videoWs.onmessage = (event) => {
+            const blob = event.data instanceof Blob ? event.data : new Blob([event.data], { type: "image/jpeg" });
+            img.src = URL.createObjectURL(blob);
+        };
+
+        // 2. Alert Audio Synthesis (Browser Native Chime)
+        function playAlertSound() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.25);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.25);
+            } catch (e) {
+                console.warn("Audio chime prevented by autoplay policy:", e);
+            }
+        }
+
+        // 3. Alert WebSocket Listener
+        const alertWs = new WebSocket(`ws://${host}/ws/alerts`);
+        const alertStatus = document.getElementById("alert-status");
+        const toastContainer = document.getElementById("toast-container");
+
+        alertWs.onopen = () => {
+            alertStatus.innerText = "CONNECTED";
+        };
+        alertWs.onclose = () => {
+            alertStatus.innerText = "DISCONNECTED";
+            alertStatus.style.color = "#ff3333";
+        };
+
+        alertWs.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            console.log("[CIPHER Alert Received]:", data);
+
+            playAlertSound();
+            showToast(data);
+        };
+
+        function showToast(alert) {
+            const toast = document.createElement("div");
+            toast.className = "toast";
+
+            const heading = alert.event || "SECURITY ALERT";
+            const message = alert.type || "Threat Triggered";
+            const timestamp = alert.timestamp || new Date().toLocaleTimeString();
+
+            toast.innerHTML = `
+                <div class="toast-title">
+                    <span>${heading}</span>
+                    <span>!</span>
+                </div>
+                <div class="toast-body">${message}</div>
+                <div class="toast-meta">${timestamp}</div>
+            `;
+
+            toastContainer.appendChild(toast);
+
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                toast.style.opacity = "0";
+                toast.style.transform = "translateX(100%)";
+                setTimeout(() => toast.remove(), 400);
+            }, 5000);
+        }
+    </script>
+</body>
 </html>
