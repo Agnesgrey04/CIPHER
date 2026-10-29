@@ -36,6 +36,7 @@ app.add_middleware(
 
 cameraurl="http://127.0.0.1:5000/"      #url of the live stream. code from camsimulation.py
 currentframebytes=None
+maineventloop=None
 
 preeventtime=8
 posteventtime=8
@@ -98,6 +99,34 @@ class ContinuousRecorder:
             self.writer=None
 
 recorder=ContinuousRecorder()
+
+class ConnectionManager:
+    def __init__(self):
+        self.activeconnections: list[WebSocket]=[]
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.activeconnections.append(websocket)
+        print(f"New Client Connected. ({len(self.activeconnections)}) ")
+
+    def disconnect(self, websocket: WebSocket):
+        if websocket in self.activeconnections:
+            self.activeconnections.remove(websocket)
+            print(f"Client Disconnected. ({len(self.activeconnections)}) ")
+
+    async def broadcast(self,data: dict):
+        for connection in list(self.activeconnections):
+            try:
+                await connection.send_json(data)
+            except:
+                self.disconnect(connection)
+
+alertmanager=ConnectionManager()
+
+def dispatchalert(payload: dict):
+    global maineventloop
+    if maineventloop is not None and maineventloop.is_running():
+        asyncio.run_coroutine_threadsafe(alertmanager.broadcast(payload), maineventloop)
 
 #Producer Thread: Pulls frames from the camera and places them onto the queue
 def streamreaderthread():
@@ -245,6 +274,11 @@ def inferenceworkerthread():
                 videowriter.write(bufferedframe)
             print("Pre Event Frames are saved!")
 
+            dispatchalert({
+                "event": "INCIDENT_TRIGGERED",
+                "type": "yolomodel alert",
+            })
+
         #for post event clip saving
         if isrecording:
             videowriter.write(labelledframe)
@@ -266,11 +300,13 @@ def inferenceworkerthread():
         #compressing video frames to JPEG Images
         _,buffer=cv2.imencode('.jpg',labelledframe)
         currentframebytes=buffer.tobytes()
-        
 
 
 @app.on_event("startup")
 async def startupevent():
+    global maineventloop
+    maineventloop=asyncio.get_running_loop()
+
     #Start the camera recorder loop
     readerthread=threading.Thread(target=streamreaderthread, daemon=True)
     readerthread.start()
@@ -297,6 +333,18 @@ async def videowebsocket(websocket: WebSocket):
         print("Client disconnected")
     except Exception as e:
         print(f"WebSocket error: {e}")
+
+@app.websocket("/ws/alerts")
+async def alertswebsocket(websocket: WebSocket):
+    await alertmanager.connect(websocket)
+    try:
+        while True:
+            # Keeps connection open and receives client heartbeat/pings
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        alertmanager.disconnect(websocket)
+    except Exception:
+        alertmanager.disconnect(websocket)
 
 @app.get("/")
 async def get_test_page():
