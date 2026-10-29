@@ -6,7 +6,7 @@ from flask import Flask, Response
 app=Flask(__name__)
 
 
-camera=cv2.VideoCapture(0, cv2.CAP_DSHOW)
+camera=cv2.VideoCapture(0, cv2.CAP_AVFOUNDATION)
 camera.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
 camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
@@ -57,4 +57,4 @@ def videofeed():
 
 if __name__ == '__main__':
     print("CIPHER Camera Simulator running...")
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    app.run(host='0.0.0.0', port=5001, debug=False)
