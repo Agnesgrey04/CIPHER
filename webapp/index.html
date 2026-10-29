@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CIPHER - Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app" v-cloak>
+    <main class="frame">
+
+      <!-- LEFT: brand side -->
+      <section class="left">
+        <div class="circle-bg"></div>
+        <div class="vline"></div>
+
+        <svg class="crosshair top" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+          <circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/>
+          <path d="M12 1v5M12 18v5M1 12h5M18 12h5"/>
+        </svg>
+        <svg class="crosshair bottom" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+          <circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/>
+          <path d="M12 1v5M12 18v5M1 12h5M18 12h5"/>
+        </svg>
+
+        <div class="badge">
+          <div class="dots dots-badge"></div>
+          <p>REAL EVIDENCE<br>REAL IMPACT</p>
+          <span class="rule"></span>
+        </div>
+
+        <div class="brand">
+          <h1>CIPHER_</h1>
+          <p class="pillars">
+            <span>SURVEILLANCE</span><span>INTEGRITY</span><span>ACCOUNTABILITY</span>
+          </p>
+          <p class="slogan">A SAFER TOMORROW</p>
+          <span class="rule center"></span>
+        </div>
+
+        <p class="watermark">SECURE<br>INTELLIGENCE<br>RELIABLE</p>
+        <img src="images/camera_curved.png" class="camera-image">
+      </section>
+
+      <!-- MIDDLE: divider with squares -->
+      <div class="divider">
+        <i class="sq black"></i><i class="sq green"></i><i class="sq lime"></i>
+      </div>
+
+      <!-- RIGHT: login side -->
+      <section class="right">
+        <div class="card">
+          <h2 class="login-label">{{ role }} Login</h2>
+          <span class="rule dark"></span>
+
+          <h3>Welcome to CIPHER</h3>
+          <p class="sub">Sign in to continue as {{ role }}</p>
+
+          <form @submit.prevent="handleLogin" novalidate>
+            <label class="field">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="12" cy="7.5" r="4.5"/><path d="M3 21c0-5 4-8 9-8s9 3 9 8z"/>
+              </svg>
+              <input type="text" v-model.trim="username" placeholder="Username" autocomplete="username">
+            </label>
+
+            <label class="field">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M6 10V7a6 6 0 0 1 12 0v3h1a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V11a1 1 0 0 1 1-1zm2 0h8V7a4 4 0 0 0-8 0z"/>
+              </svg>
+              <input :type="showPassword ? 'text' : 'password'" v-model="password" placeholder="Password" autocomplete="current-password">
+              <button type="button" class="eye" @click="showPassword = !showPassword"
+                      :aria-label="showPassword ? 'Hide password' : 'Show password'">
+                <svg v-if="showPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+                <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>
+                  <path d="M3 3l18 18"/>
+                </svg>
+              </button>
+            </label>
+
+            <p class="error" v-if="error">{{ error }}</p>
+
+            <button type="submit" class="submit">{{ role }} Login <span>→</span></button>
+          </form>
+
+          <button type="button" class="switch" @click="toggleRole">
+            Switch to {{ otherRole }} login
+          </button>
+          
+        </div>
+        <div class="dots dots-card"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@3.5.13/dist/vue.global.prod.js"></script>
+  <script src="js/script.js"></script>
+</body>
+</html>

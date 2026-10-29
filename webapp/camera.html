@@ -1,0 +1,111 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CIPHER - Camera Monitoring</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/camera.css">
+</head>
+
+<body>
+  <div id="cameraApp" v-cloak>
+    <main class="dashboard">
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <a class="logo" href="index.html">CIPHER<span>_</span></a>
+
+        <nav class="navigation">
+          <button
+            v-for="item in navigation"
+            :key="item.label"
+            :class="['nav-item', { active: activeNav === item.label }]"
+            @click="navigate(item)"
+          >
+            <span class="nav-icon">{{ item.icon }}</span>
+            <span>{{ item.label }}</span>
+          </button>
+        </nav>
+
+        <button class="logout" @click="logout">
+          <span>↗</span> Logout
+        </button>
+      </aside>
+
+      <!-- Main content -->
+      <section class="main-content">
+
+        <header class="topbar">
+          <div class="camera-heading">
+            <h1>CIPHER CAM-01</h1>
+            <span class="live-badge">
+              <span class="live-dot"></span>
+              {{ selectedCamera.status }}
+            </span>
+          </div>
+
+            </header>
+
+        <!-- Camera monitor -->
+        <section class="monitor-card">
+
+          <div class="video-frame">
+            <div class="video-placeholder">
+
+              <!-- Grid resembling a camera surveillance view -->
+              <div class="scene-grid"></div>
+
+              <div class="video-top">
+                
+                
+              </div>
+
+              <!-- Demo detection overlay -->
+              <div
+                v-if="detectionEnabled && selectedCamera.detected"
+                class="detection-box"
+              >
+                <span class="detection-label">
+                  {{ selectedCamera.detection }}
+                </span>
+                <div class="detection-object">
+                  <span>⚠</span>
+                </div>
+              </div>
+
+              <div class="video-bottom">
+                
+              </div>
+
+              <div v-if="!selectedCamera.detected" class="clear-status">
+                NO ACTIVE DETECTION
+              </div>
+
+            </div>
+          </div>
+
+          <div class="monitor-controls">
+            <span class="feed-label">CAMERA FEED</span>
+        </div>
+
+        </section>
+
+        <div class="dashboard-footer">
+          
+          
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@3.5.13/dist/vue.global.prod.js"></script>
+  <script src="js/camera.js"></script>
+</body>
+</html>
