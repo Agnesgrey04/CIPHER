@@ -6,3 +6,4 @@ __pycache__
 yolov8s.pt
 *.mp4
 .mp4
+.vscode
