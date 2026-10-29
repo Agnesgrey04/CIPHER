@@ -100,7 +100,6 @@ body {
 .brand h1 {
   font-family: "AlphaPixels", monospace;
   font-weight: normal;
-  font-size: clamp(150px, 15vw, 200px);
   letter-spacing: .04em;
   color: var(--ink);
   white-space: nowrap;
