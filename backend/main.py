@@ -34,7 +34,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-cameraurl="http://127.0.0.1:5000/"      #url of the live stream. code from camsimulation.py
+cameraurl="http://127.0.0.1:5001/"      #url of the live stream. code from camsimulation.py
 currentframebytes=None
 maineventloop=None
 
