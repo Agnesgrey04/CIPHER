@@ -220,7 +220,7 @@ body {
   .photo { width: 85%; }
   .right { padding: 40px 24px 56px; }
   .brand h1 {
-  font-size: clamp(150px, 20vw,150px);
+  font-size: clamp(200px, 30vw,170px);
 }
 
 .card h3 {

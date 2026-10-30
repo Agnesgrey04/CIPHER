@@ -17,203 +17,48 @@
 
 <body>
     <div id="cameraApp" v-cloak>
-        <header class="topbar">
-            <a class="brand" href="index.html" aria-label="CIPHER home">
-                <span class="brand-name">CIPHER_</span>
-                <span class="brand-subtitle">SECURE SURVEILLANCE SYSTEM</span>
-            </a>
-
-            <div class="topbar-right">
-                <div class="system-status">
-                    <span class="status-dot"></span>
-                    <span>SYSTEM ONLINE</span>
-                </div>
-
-                <div class="clock">
-                    <span>{{ currentDate }}</span>
-                    <strong>{{ currentTime }}</strong>
-                </div>
-
-                <button class="logout-button" @click="logout">
-                    LOG OUT <span>↗</span>
-                </button>
-            </div>
-        </header>
+        
 
         <div class="dashboard">
-            <aside class="sidebar">
-                <div class="sidebar-label">WORKSPACE</div>
-
-                <nav class="navigation" aria-label="Main navigation">
-                    <button
-                        v-for="item in navigation"
-                        :key="item.label"
-                        class="nav-item"
-                        :class="{ active: activeNav === item.label }"
-                        @click="navigate(item)"
-                    >
-                        <span class="nav-icon">{{ item.icon }}</span>
-                        <span>{{ item.label }}</span>
-                        <span v-if="item.label === 'Cameras'" class="nav-arrow">›</span>
-                    </button>
-                </nav>
-
-                <div class="sidebar-bottom">
-                    <div class="sidebar-label">CONNECTION</div>
-
-                    <div class="connection-card">
-                        <span class="connection-indicator"
-                              :class="{ connected: connectionState === 'connected' }"></span>
-
-                        <div>
-                            <strong>{{ connectionLabel }}</strong>
-                            <span>Camera WebSocket</span>
-                        </div>
-                    </div>
-
-                    <div class="sidebar-version">CIPHER WEB / 1.0</div>
-                </div>
-            </aside>
-
-            <main class="main-content">
-                <section class="page-heading">
+          <main class="main-content">
+            <section class="camera-layout">
+              <div class="monitor-panel">
+                <div class="monitor-header">
+                  <div class="camera-title">
+                    <span class="camera-symbol">▣</span>
                     <div>
-                        <div class="eyebrow">MONITORING / LIVE FEED</div>
-                        <h1>Camera Monitor<span class="heading-period">.</span></h1>
-                        <p>Real-time surveillance and camera status.</p>
+                      <h2>CIPHER CAM-01</h2>
+                      <p>Main Camera Feed</p>
                     </div>
+                  </div>
+                  <div class="monitor-header-right">
+                    <span class="live-label">
+                      <span
+                      class="status-dot"
+                      :class="{ 'status-dot-offline': connectionState !== 'connected' }"
+                      ></span>
+                      {{ connectionState === 'connected' ? 'LIVE' : 'DISCONNECTED' }}
+                    </span>
+                  </div>
+                </div>
+                <div class="monitor-screen">
+                  <img
+                  v-if="hasFrame"
+                  :src="frameUrl"
+                  class="live-image"
+                  alt="CIPHER Live Camera Feed"
+                  >
+                  <div v-if="!hasFrame" class="feed-placeholder">
+                    <div class="placeholder-icon">▣</div>
+                    <h3>CONNECTING TO CAMERA</h3>
+                    <p>{{ statusMessage }}</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </main>
+                    
 
-                    <div class="feed-badge" :class="{ 'feed-offline': connectionState !== 'connected' }">
-                        <span class="status-dot"></span>
-                        {{ connectionState === 'connected' ? 'LIVE' : connectionLabel.toUpperCase() }}
-                    </div>
-                </section>
-
-                <section class="camera-layout">
-                    <div class="monitor-panel">
-                        <div class="monitor-header">
-                            <div class="camera-title">
-                                <span class="camera-symbol">▣</span>
-                                <div>
-                                    <h2>CIPHER {{ selectedCamera.id }}</h2>
-                                    <p>{{ selectedCamera.name }}</p>
-                                </div>
-                            </div>
-
-                            <div class="monitor-header-right">
-                                <span class="encrypted-label">
-                                    <span>◆</span> SECURE FEED
-                                </span>
-                                <span class="live-label">
-                                    <span class="status-dot"></span> LIVE
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="monitor-screen">
-                            <img
-                                v-if="hasFrame"
-                                :src="frameUrl"
-                                class="live-image"
-                                alt="Live CIPHER camera feed"
-                            >
-
-                            <div v-if="!hasFrame" class="feed-placeholder">
-                                <div class="placeholder-icon">▣</div>
-                                <h3>{{ connectionState === 'connected' ? 'WAITING FOR VIDEO' : 'CONNECTING TO CAMERA' }}</h3>
-                                <p>{{ statusMessage }}</p>
-                                <span class="loading-line"></span>
-                            </div>
-
-                            <div class="screen-overlay">
-                                <span>CIPHER / {{ selectedCamera.id }}</span>
-                                <span>{{ currentTime }}</span>
-                            </div>
-
-                            <div class="screen-corner corner-tl"></div>
-                            <div class="screen-corner corner-tr"></div>
-                            <div class="screen-corner corner-bl"></div>
-                            <div class="screen-corner corner-br"></div>
-                        </div>
-
-                        <div class="monitor-footer">
-                            <div class="footer-metric">
-                                <span class="metric-label">CAMERA</span>
-                                <strong>{{ selectedCamera.id }}</strong>
-                            </div>
-
-                            <div class="footer-metric">
-                                <span class="metric-label">STATUS</span>
-                                <strong :class="{ 'text-online': connectionState === 'connected' }">
-                                    {{ connectionState === 'connected' ? 'STREAMING' : 'OFFLINE' }}
-                                </strong>
-                            </div>
-
-                            <div class="footer-metric">
-                                <span class="metric-label">PROTOCOL</span>
-                                <strong>WEBSOCKET</strong>
-                            </div>
-
-                            <button class="reconnect-button" @click="connectCamera">
-                                ↻ RECONNECT
-                            </button>
-                        </div>
-                    </div>
-
-                    <aside class="camera-panel">
-                        <div class="panel-heading">
-                            <div>
-                                <div class="eyebrow">AVAILABLE DEVICES</div>
-                                <h2>Camera Nodes</h2>
-                            </div>
-                            <span class="node-count">{{ cameras.length.toString().padStart(2, '0') }}</span>
-                        </div>
-
-                        <div class="camera-list">
-                            <button
-                                v-for="camera in cameras"
-                                :key="camera.id"
-                                class="camera-item"
-                                :class="{ selected: selectedId === camera.id }"
-                                @click="selectCamera(camera)"
-                            >
-                                <span class="camera-item-icon">▣</span>
-
-                                <span class="camera-item-info">
-                                    <strong>{{ camera.id }}</strong>
-                                    <span>{{ camera.name }}</span>
-                                </span>
-
-                                <span
-                                    class="node-dot"
-                                    :class="{ 'node-active': camera.id === selectedId && connectionState === 'connected' }"
-                                ></span>
-                            </button>
-                        </div>
-
-                        <div class="selected-info">
-                            <div class="eyebrow">SELECTED NODE</div>
-                            <h3>{{ selectedCamera.name }}</h3>
-                            <p>{{ selectedCamera.id }} · Test stream</p>
-                            <div class="selected-status">
-                                <span class="status-dot"
-                                      :class="{ 'status-dot-offline': connectionState !== 'connected' }"></span>
-                                {{ connectionState === 'connected' ? 'Receiving frames' : 'No active stream' }}
-                            </div>
-                        </div>
-
-                        <div class="stream-note">
-                            <span class="note-icon">ⓘ</span>
-                            <p>The current WebSocket provides one stream. Selecting a node changes its dashboard label; it does not switch the backend camera.</p>
-                        </div>
-                    </aside>
-                </section>
-
-                <footer class="page-footer">
-                    <span>CIPHER_ / SURVEILLANCE WITH INTEGRITY</span>
-                    <span>LOCAL DEVELOPMENT ENVIRONMENT</span>
-                </footer>
-            </main>
         </div>
     </div>
 

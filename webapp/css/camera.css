@@ -152,19 +152,14 @@ a:focus-visible {
 }
 
 .dashboard {
-    display: grid;
-    grid-template-columns: 230px minmax(0, 1fr);
-    min-height: calc(100vh - 82px);
+    display: block;
+    min-height: 100vh;
 }
 
-.sidebar {
-    display: flex;
-    flex-direction: column;
-    min-height: 100%;
-    padding: 30px 17px 18px;
-    background: #eeede4;
-    border-right: 1px solid var(--line);
-}
+
+
+
+
 
 .sidebar-label,
 .eyebrow {
@@ -273,10 +268,17 @@ a:focus-visible {
     letter-spacing: .5px;
 }
 
+
 .main-content {
-    min-width: 0;
-    padding: 35px 38px 20px;
+    width: 100%;
+    min-height: 100vh;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
+
+
 
 .page-heading {
     display: flex;
@@ -329,14 +331,13 @@ a:focus-visible {
 }
 
 .camera-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 280px;
-    gap: 20px;
-    align-items: start;
+    display: block;
+    width: 100%;
 }
 
-.monitor-panel,
-.camera-panel {
+.monitor-panel {
+    width: 100%;
+    max-width: 1000px;
     min-width: 0;
     border: 1px solid var(--line);
     background: var(--paper);
@@ -371,7 +372,7 @@ a:focus-visible {
 
 .camera-title h2 {
     margin: 0 0 5px;
-    font-size: 12px;
+    font-size: 24px;
     letter-spacing: .3px;
 }
 
@@ -813,8 +814,7 @@ a:focus-visible {
         font-size: 9px;
     }
 
-    .dashboard {
-        grid-template-columns: 1fr;
+    
     }
 
     .sidebar {
@@ -935,4 +935,11 @@ a:focus-visible {
         flex-direction: column;
         font-size: 8px;
     }
+    .camera-layout {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
 }
+
