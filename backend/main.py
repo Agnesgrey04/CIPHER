@@ -328,7 +328,8 @@ async def videowebsocket(websocket: WebSocket):
             if currentframebytes:
                 await websocket.send_bytes(currentframebytes)   #send bytes to software
                 await asyncio.sleep(0.033)          #30FPS
-
+            else:
+                await asyncio.sleep(0.05)
     except WebSocketDisconnect:
         print("Client disconnected")
     except Exception as e:

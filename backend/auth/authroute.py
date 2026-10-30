@@ -70,7 +70,7 @@ async def login(credentials: LoginRequest):
     userreference=db.collection("users").document(uid)
     userdocument=userreference.get()
 
-    if not userdocument.exist:
+    if not userdocument.exists:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied: User account is not authorized in CIPHER.")
 
     userdata=userdocument.to_dict()
@@ -81,8 +81,8 @@ async def login(credentials: LoginRequest):
 
 
     return AuthenticationResponse(
-        access_token=idtoken,
-        token_type="bearer",
+        accesstoken=idtoken,
+        tokentype="bearer",
         uid=uid,
         email=email,
         role=role,
